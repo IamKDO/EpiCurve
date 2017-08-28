@@ -1,0 +1,184 @@
+---
+title: "Test des courbes épidémiques"
+author: "Jean Pierre Decrorps"
+date: "14/06/2016"
+output: html_document
+---
+
+
+
+```{r echo=TRUE, warning=FALSE}
+# library(methods)
+library(timeDate)
+#library(timeSeries)
+#library(fBasics)
+#library(plyr)
+#library(jsonlite)
+library(ggplot2)
+#library(gridExtra)
+library(EpiCurve)
+library(dplyr)
+library(scales)
+library(knitr)
+
+```
+
+## Cas 1: Données journalières agrégées avec factors
+
+```{r, echo=FALSE}
+DF <- read.csv("cas_date_osea_jours.csv", stringsAsFactors=FALSE)
+# DF <- DF[1, ]
+# DF[1, 2] <- 1
+#DF$date <- as.Date(DF$date)
+
+# DF_V <- DF[DF[,"factor"] == "Validé", 1:2]
+# DF_I <- DF[DF[,"factor"] == "Invalidé", 1:2]
+DF2 <- DF %>%
+  dplyr::group_by(date) %>%
+  dplyr::summarise(value = sum(value)) %>%
+  as.data.frame()
+```
+
+Tracé de la courbe épidémiologique
+
+
+```{r}
+EpiCurve(DF2,
+         date = "date",
+         freq = "value",
+         cutvar = "factor",
+         period = "day",
+         cutorder = c("Invalidé", "Validé"),
+         color=c("#009900", "#000099"),
+         ylabel="Nombre de cas",
+         xlabel=sprintf("From %s To %s", min(DF$date), max(DF$date)),
+         title = "Epidemic Curve",
+         note = "Dayly epidemic curve of deseases")
+
+
+```
+
+
+## Cas 2: Données hebdomadaires agrégées avec factors
+
+```{r, echo=FALSE,results='asis'}
+DF <- read.csv2("cas_date_osea_semaines_02.csv", stringsAsFactors=FALSE, fileEncoding="latin1")
+#DF <- DF[1:2, ]
+
+kable(DF)
+```
+
+Tracé de la courbe épidémiologique
+
+
+```{r}
+EpiCurve(DF,
+         date = "date",
+         freq = "value",
+         cutvar = "factor",
+         period = "week",
+         cutorder = c( "Valid","Invalid"),
+         color=c( "#990000","#009900"),
+         ylabel="Nombre de cas",
+         xlabel=sprintf("Du %s au %s", min(DF$date), max(DF$date)),
+         title = "Courbe épidémique hebdomadaire\n")
+
+```
+
+## Cas 3: Données hebdomadaires agrégées sans factors
+
+```{r, echo=FALSE}
+DF <- read.csv2("cas_date_osea_semaines_02.csv", stringsAsFactors=FALSE) %>%
+  select(-factor) %>%
+  as.data.frame()
+kable(DF)
+#DF$date <- as.Date(DF$date)
+DF <- DF[,-3]
+```
+
+Tracé de la courbe épidémiologique
+
+
+```{r}
+EpiCurve(DF,
+         date = "date",
+         freq = "value",
+         period = "week",
+         color=c("#990000"),
+         ylabel="Nombre de cas",
+         xlabel=sprintf("Du %s au %s", min(DF$date), max(DF$date)),
+         title = "Courbe épidémique\n")
+
+```
+
+## Cas 4: Données mensuelles agrégées
+```{r, echo=FALSE}
+DF <- read.csv2("cas_date_osea_mois_sansFactor.csv", stringsAsFactors=FALSE)
+#DF <- DF[1, ]
+kable(DF)
+DF$date <- as.Date(paste(DF$date,"-01",sep=""))
+# DF <-DF[-3,]
+```
+
+Tracé de la courbe épidémique
+
+
+```{r}
+EpiCurve(DF,
+         date = "date",
+         freq = "value",
+         period = "month",
+         color=c("#990066"),
+         ylabel="Nombre de cas",
+         xlabel=sprintf("Du %s au %s", min(DF$date), max(DF$date)),
+         title = "Courbe épidémique mensuelle\n")
+
+```
+
+## Cas 5: Données mensuelles agrégées avec factors
+```{r, echo=FALSE}
+DF <- read.csv2("cas_date_osea_mois.csv", stringsAsFactors=FALSE)
+#DF$date <- as.Date(paste(DF$date,"-01",sep=""))
+#DF <- DF[1:2, ]
+kable(DF)
+
+```
+
+Tracé de la courbe épidémique
+
+
+```{r}
+EpiCurve(DF,
+         date = "date",
+         freq = "value",
+         period = "month",
+         cutvar = "factor",
+         cutorder = c( "Validé","Invalidé"),
+         colors=c("#990000", "#009900"),
+         ylabel="Nombre de cas",
+         xlabel=sprintf("Du %s au %s", min(DF$date), max(DF$date)),
+         title = "Courbe épidémique mensuelle avec factors\n")
+
+```
+
+# Hourly 
+```{r}
+
+date <- seq(as.timeDate("2017-05-10 21:35:22"), as.timeDate("2017-05-12 06:15:12"), by="12 min")
+val <- rep(1, length(date))
+tri <- rep(c("Alive", "Died","Unknown"), length.out=length(date))
+DF <- data.frame(date, val, tri)
+names(DF) <- c("date","value", "tri")
+
+
+EpiCurve(DF,
+         date = "date",
+         freq = "value",
+         period = "hour",
+         split = 4,
+         cutvar = "tri",
+         ylabel="Number of cases",
+         xlabel=sprintf("Du %s au %s", min(as.Date(DF$date)), as.Date(max(DF$date))),
+         title = "Epidemic Curve")
+
+```
