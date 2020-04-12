@@ -1,19 +1,17 @@
 Package: EpiCurve
 Type: Package
 Title: Plot an Epidemic Curve
-Version: 2.2-1
-Date: 2019-09-09
+Version: 2.3-1
+Date: 2020-04-10
 Authors@R: c(person("Jean Pierre", "Decorps", role = c("aut", "cre"),
-                     email = "jp.decorps@epiconcept.fr"),
-              person("Morgane","Vallee", role = "ctb", 
-                email = "m.vallee@epiconcept.fr")
+                     email = "jean.pierre.decorps@gmail.com")
               )
 Description: Creates simple or stacked epidemic curves for hourly, daily, weekly or monthly outcome data.
 License: LGPL-3
 Encoding: UTF-8
 LazyData: true
-Depends: ggplot2, dplyr, ISOweek, scales, timeDate 
-Imports: RColorBrewer
+Depends: ggplot2, dplyr, ISOweek, scales, timeDate
+Imports: RColorBrewer, tibble
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr
